@@ -1,0 +1,222 @@
+<!-- templates/base.html -->
+<!-- base.html -->
+<!DOCTYPE html>
+<html>
+
+<!-- Head-->
+
+<head>
+    <title>Market Observer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="/static/img/bot.ico" />
+    <link rel="stylesheet" href="/static/w3c/css/w3.css">
+    <link rel="stylesheet" href="static/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/w3c/css/prism.css">
+    <script src="/static/js/prism.js"></script>
+    <script src="/static/js/prism-rust.min.js"></script>
+    <script src="/static/js/prism-python.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <style>
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .chart-wrapper {
+            height: 400px;
+        }
+
+        .card {
+            border: none;
+        }
+    </style>
+</head>
+<!-- End Head-->
+
+<body class="w3-light-grey" style="margin-top:43px;">
+
+    <div id="main" class="w3-main" style="margin-left:300px;">
+
+        <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:1000px" id="band">
+            <h2 class="w3-wide">Market Observer</h2>
+            <p class="w3-opacity"><i>Powered by FastAPI & AsyncIO</i></p>
+            <br>
+            <hr>
+
+            <!-- INJECTED STOCK MONITOR DASHBOARD -->
+            <div class="dashboard-container container-fluid text-left">
+                <div class="dashboard-header mb-4">
+                    <div class="card card-body shadow-sm rounded-lg overflow-hidden mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <h2 class="h4 mb-0 text-dark font-weight-bold">Observer Timeframe :</h2>
+                            </div>
+                            <div class="col-auto">
+                                <span class="header-controls">
+                                    <select id="timeframeSelector" class="form-select" style="width: auto;">
+                                        <option value="5m">5m</option>
+                                    </select>
+                                </span>
+                            </div>
+                            <div class="col text-right">
+                                <button id="connectionIcon" type="button" class="btn btn-link" style="color: blue;"
+                                    data-toggle="modal" data-target="#connectionLogModal"
+                                    onclick="dashboard.openConnectionLog()">
+                                    <i class="fa fa-history fa-fw"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="row" id="metricsGrid">
+                        <div class="col-md-4">
+                            <div class="card shadow-sm rounded-lg overflow-hidden h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-muted">Active Symbols</h5>
+                                    <div class="metric-value text-primary" id="activeSymbols">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm rounded-lg overflow-hidden h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title text-muted">Last Update</h5>
+                                    <div class="metric-value text-success" id="lastUpdate">--:--:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- Abnormal Volume Metrics Block -->
+                            <div class="card h-100 shadow-sm rounded-lg overflow-hidden" id="blockAbnormalVol">
+                                <div class="card-header bg-white font-weight-bold">📢 Abnormal
+                                    Volume</div>
+                                <div class="card-body p-0 block-content list-group list-group-flush pl-3 pr-3"
+                                    id="abnormalVolList" style="max-height: 100px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Grid (New Layout) -->
+                <div class="row analysis-grid mb-4">
+                    <!-- Top Gainers -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100 shadow-sm rounded-lg overflow-hidden" id="blockTopGainers">
+                            <div class="card-header bg-white font-weight-bold">🚀 Top Gainers</div>
+                            <div class="card-body p-0 block-content list-group list-group-flush" id="topGainersList"
+                                style="max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                    <!-- Top Losers -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100 shadow-sm rounded-lg overflow-hidden" id="blockTopLosers">
+                            <div class="card-header bg-white font-weight-bold">📉 Top Losers</div>
+                            <div class="card-body p-0 block-content list-group list-group-flush" id="topLosersList"
+                                style="max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                    <!-- High Activity -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100 shadow-sm rounded-lg overflow-hidden" id="blockHighActivity">
+                            <div class="card-header bg-white font-weight-bold">⚡ High Activity</div>
+                            <div class="card-body p-0 block-content list-group list-group-flush" id="highActivityList"
+                                style="max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                    <!-- Low Activity -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100 shadow-sm rounded-lg overflow-hidden" id="blockLowActivity">
+                            <div class="card-header bg-white font-weight-bold">💤 Low Activity</div>
+                            <div class="card-body p-0 block-content list-group list-group-flush" id="lowActivityList"
+                                style="max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Symbols List -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow-sm rounded-lg overflow-hidden">
+                            <div class="card-header bg-white font-weight-bold">
+                                📊 Active Symbols
+                            </div>
+                            <div class="card-body symbols-container">
+                                <div class="symbols-grid row" id="symbolsGrid">
+                                    <div class="d-flex justify-content-center p-5 col-12">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backend Health Metrics -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm rounded-lg overflow-hidden">
+                            <div class="card-header bg-white font-weight-bold">
+                                🩺 Backend Health
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-6 border-right">
+                                        <h6 class="text-muted mb-1">Aggregation Latency</h6>
+                                        <div class="metric-value" id="aggLatency">--</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-1">Throughput</h6>
+                                        <div class="h5 font-weight-bold mb-0" id="processedItems">--</div>
+                                        <div class="small text-muted">Items / Windows</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END INJECTED DASHBOARD -->
+
+            <!-- Connection Log Modal -->
+            <div class="modal fade" id="connectionLogModal" role="dialog">
+                <div class="modal-dialog modal-dialog-centered modal-sm modal-dialog-scrollable">
+                    <div class="modal-content" style="border: 3px solid #000000; ">
+                        <div class="modal-header bg-light">
+                            <h4 class="modal-title">Connections log :</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <h4 id="ConnnectionInfos" name="ConnnectionInfos" style="text-align: left;"></h4>
+                            <table class="table" id="TableConnnectionInfos">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modalContent">
+                                    <!-- Log rows will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <!-- END MAIN -->
+
+
+        <!-- Dashboard Logic -->
+        <script src="/static/dashboard.js"></script>
+</body>
+
+</html>
