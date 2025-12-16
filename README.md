@@ -2,7 +2,7 @@
 
 # MarketObserver
 
-**MarketObserver** is a high-performance, asynchronous market surveillance system designed to track real-time stock data, aggregate it into custom timeframes, and detect statistical anomalies using efficient numerical methods.
+**MarketObserver** is a high-performance, asynchronous market surveillance system designed to track real-time stock data, aggregate it into custom timeframes, and detect statistical anomalies using (simple demo) numerical methods.
 
 ## 🚀 Features
 
@@ -93,3 +93,4 @@ RETENTION_DAYS: 7
 │   └── utils/               # RingBuffer, Scheduler, MemoryManager
 └── README.md
 ```
+
