@@ -1,0 +1,58 @@
+app:
+  name: StockMonitor
+  version: 1.0.0
+
+server:
+  host: 127.0.0.1
+  port: 8000
+
+storage:
+  db_type: sqlite
+  db_path: stocks.db
+  db_connection_string: postgresql://user:password@localhost/dbname
+
+network:
+  timeout: 10
+  retries: 3
+  concurrent_requests: 25
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+  proxies: []
+
+windows_aggregation:
+  - 5m
+  - 10m
+  - 15m
+  - 30m
+  - 1h
+  - 2h
+  - 4h
+
+data_source:
+  data_retention_days: 7
+  update_interval_seconds: 300
+  symbols:
+    - AAPL
+    - MSFT
+    - GOOGL
+    - AMZN
+    - NVDA
+    - TSLA
+    - META
+    - BRK-B
+    - UNH
+    - JNJ
+    - JPM
+    - XOM
+    - V
+    - PG
+    - MA
+    - HD
+    - CVX
+    - ABBV
+    - MRK
+    - PEP
+    - LULU
+    - RCL
+
+logging:
+  level: INFO
