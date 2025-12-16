@@ -38,7 +38,8 @@ class WebsocketManager:
         logger.info(f"New WebSocket connection. Total: {len(self.active_connections)}")
 
     #-----------------------------------------------------------------------------------------------      
-    def disconnect(self, websocket: WebSocket):
+    async def disconnect(self, websocket: WebSocket):
+        await websocket.close()
         self.active_connections.remove(websocket)
         logger.info(f"WebSocket disconnected. Total: {len(self.active_connections)}")
 
@@ -60,7 +61,7 @@ class WebsocketManager:
         
         # Remove disconnected clients
         for connection in disconnected:
-            self.disconnect(connection)
+            await self.disconnect(connection)
 
 
 #----------------------------------------------------------------------------------------------- 
@@ -130,8 +131,10 @@ class FastAPIServer(IDataExchanger):
                     data = await websocket.receive_text()
                     # Handle client commands (filter symbols, time ranges, etc.)
                     await self._handle_client_message(websocket, data)
-            except WebSocketDisconnect:
-                self.connection_manager.disconnect(websocket)
+
+        except Exception as e:
+            logger.warning(f"Error while trying to handle client message : {str(e)}")
+            await self.connection_manager.disconnect(websocket)
 
     #-----------------------------------------------------------------------------------------------          
         # REST API endpoints (backward compatibility)
@@ -184,7 +187,7 @@ class FastAPIServer(IDataExchanger):
                 
         except Exception as e:
             logger.warning(f"Error while trying to handle client message : {str(e)}")
-            await websocket.close()
+            await self.connection_manager.disconnect(websocket)
 
     #-----------------------------------------------------------------------------------------------         
     def symbol_view_response(self, symbols: List[str], timeframe: str = None):        
@@ -283,4 +286,5 @@ class FastAPIServer(IDataExchanger):
             log_level="info"
         )
         server = uvicorn.Server(config)
+
         await server.serve()
