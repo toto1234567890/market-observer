@@ -1,0 +1,3 @@
+- add a more reliable data sources maybe option too...
+- rewrite in GO if need large amount of symbols (go better than python for this async function)
+- add notifier binding
